@@ -17,7 +17,7 @@ Dies ist ein privates Hobby-Projekt, kostenlos und ohne Gewinnabsicht bereitgest
 Es wird keine Haftung für Datenverlust, Fehlfunktionen oder Schäden jeglicher Art übernommen, die durch die Nutzung dieser Software entstehen könnten. Es besteht kein Anspruch auf Support, Updates oder Fehlerbehebung.
 
 ## Datenschutz 
-Alle kopierten Inhalte (Text, Links, Bilder) werden ausschließlich lokal auf deinem Mac gespeichert, niemals an externe Server geschickt. Zwei optionale Funktionen kontaktieren das Internet, nur wenn du sie aktiv einschaltest: die Link-Vorschau (ruft die jeweilige Webseite auf, um Titel/Favicon zu laden) und die Update-Prüfung (fragt eine kleine Textdatei ab, um auf neue Versionen hinzuweisen). Beide sind standardmäßig deaktivierbar bzw. senden keine persönlichen Daten.
+Alle kopierten Inhalte (Text, Links, Bilder) werden ausschließlich lokal auf deinem Mac gespeichert, niemals an externe Server geschickt. Zwei optionale Funktionen kontaktieren das Internet. Die Link-Vorschau lässt sich in der App jederzeit ein-/ausschalten. Die Update-Prüfung läuft automatisch bei jedem Start und kann aktuell nicht deaktiviert werden — sie sendet dabei aber keine persönlichen Daten, nur eine anonyme Anfrage nach der aktuellen Versionsnummer.
 
 
 ## Hinweis 
