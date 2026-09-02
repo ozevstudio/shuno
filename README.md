@@ -9,6 +9,11 @@ Installation
 2. Shuno.app in den Programme-Ordner ziehen (NICHT im Downloads-Ordner liegen lassen)
 3. Rechtsklick auf Shuno.app → Öffnen (nur beim ersten Start nötig)
 
+## Warnhinweis beim ersten Start. 
+MacOS zeigt beim ersten Öffnen die Meldung "Apple konnte nicht überprüfen, ob 'shuno' frei von Schadsoftware ist". Das ist normal und liegt daran, dass die App nicht mit einem kostenpflichtigen Apple Developer-Zertifikat signiert ist — kein echtes Sicherheitsproblem. So lässt sich das umgehen: 
+1. Mit der rechten Maustaste auf shuno.app klicken → "Öffnen" auswählen
+2. Falls dort kein "Trotzdem öffnen"-Button erscheint: Systemeinstellungen → Datenschutz & Sicherheit → nach unten scrollen → "Trotzdem öffnen" klicken Das ist nur beim allerersten Start nötig.
+
 ## Systemanforderungen
 Mac mit Apple Silicon (M1 oder neuer) — Intel-Macs werden NICHT unterstützt - macOS 26 (Tahoe) oder neuer
 
