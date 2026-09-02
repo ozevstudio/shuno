@@ -1,7 +1,7 @@
 
 <img width="256" height="256" alt="icon_256x256 1" src="https://github.com/user-attachments/assets/376ff8f3-cddf-479c-8949-4adf94007a95" />
 
-# Shuno - ein schlanker Clipboard-Manager für macOS
+# Shuno - ein schlanker Clipboard-Manager für Apple Silicon
 Downloads für die Shuno Mac-App.
 
 Installation 
