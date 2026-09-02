@@ -22,3 +22,14 @@ Alle kopierten Inhalte (Text, Links, Bilder) werden ausschließlich lokal auf de
 
 ## Hinweis 
 Diese App wurde mit Unterstützung von Claude (Anthropic) entwickelt.
+
+## App Screenshots
+
+<img width="1012" height="564" alt="Bildschirmfoto 2026-09-02 um 08 55 28" src="https://github.com/user-attachments/assets/60422425-d8f7-4997-9076-56efe027c128" />
+<img width="1012" height="564" alt="Bildschirmfoto 2026-09-02 um 08 55 18" src="https://github.com/user-attachments/assets/00096438-7092-467e-9810-90139201d541" />
+<img width="1012" height="564" alt="Bildschirmfoto 2026-09-02 um 08 53 42" src="https://github.com/user-attachments/assets/b24b4513-9a4f-452c-9d79-03ad70b74a4c" />
+<img width="1012" height="564" alt="Bildschirmfoto 2026-09-02 um 08 53 31" src="https://github.com/user-attachments/assets/620fc34b-46cb-4165-b707-4d3f612896e8" />
+<img width="1012" height="564" alt="Bildschirmfoto 2026-09-02 um 08 53 20" src="https://github.com/user-attachments/assets/d5ba6b2f-b5a6-415c-a629-aee5ea758110" />
+<img width="1012" height="564" alt="Bildschirmfoto 2026-09-02 um 08 53 11" src="https://github.com/user-attachments/assets/ec0edefd-968d-402c-abd4-e80e7cd88ea8" />
+<img width="1012" height="564" alt="Bildschirmfoto 2026-09-02 um 08 53 00" src="https://github.com/user-attachments/assets/c5771d6e-d1ad-45d5-b723-cde7ed9421fe" />
+
