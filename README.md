@@ -3,7 +3,7 @@
 
 # Shuno – dein schlanker Clipboard-Manager
 
-Ein nativer, schlanker Clipboard-Manager für macOS. Läuft direkt in der Menüleiste, merkt sich kopierte Texte, Links und Bilder, und macht sie jederzeit wieder griffbereit.
+Ein nativer, schlanker Clipboard-Manager für macOS. Merkt sich kopierte Texte, Links und Bilder in einem übersichtlichen Fenster und ist zusätzlich über eine Menüleisten-Kurzliste jederzeit griffbereit.
 
 ## Systemanforderungen
 
