@@ -19,11 +19,11 @@ Ein nativer, schlanker Clipboard-Manager für macOS. Merkt sich kopierte Texte, 
 
 ### Datenschutz
 - Einträge lassen sich per Schloss-Symbol verstecken — erst nach Touch ID oder Mac-Passwort wieder sichtbar
-- Der komplette Verlauf (Text **und** Bilder) ist AES-256-verschlüsselt auf der Festplatte gespeichert, nicht nur in der App-Ansicht gefiltert
+- Der komplette Verlauf (Text **und** Bilder) ist verschlüsselt auf der Festplatte gespeichert, nicht nur in der App-Ansicht gefiltert
 - Der "Verbergen"-Reiter lässt sich in den Einstellungen optional komplett aus der Seitenleiste ausblenden
 
 ### Backup
-- Optionales, verschlüsseltes iCloud-Backup (Einstellungen → iCloud) — schützt den Verlauf, falls der Mac mal kaputt geht oder ersetzt wird
+- Optionales, iCloud-Backup (Einstellungen → iCloud) — schützt den Verlauf, falls der Mac mal kaputt geht oder ersetzt wird
 
 ### Sonstiges
 - Menüleisten-Kurzliste: die letzten oder manuell angepinnten Einträge direkt kopieren, ohne das Fenster zu öffnen
