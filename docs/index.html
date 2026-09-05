@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shuno — Privater Clipboard-Manager für den Mac</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --ink: #0E1016;
+    --paper: #F3F1EC;
+    --accent: #A970FF;
+    --accent-dim: #7B3FC4;
+    --line: rgba(243,241,236,0.14);
+    --glass-bg: rgba(255,255,255,0.06);
+    --glass-border: rgba(255,255,255,0.16);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Weiche, farbige Lichtflecken im Hintergrund — sorgen dafür, dass die
+     Glasflächen etwas haben, das durch sie hindurchscheinen kann, genau wie
+     bei der App selbst (Liquid Glass lebt von Farbe darunter, nicht von der
+     Fläche selbst). */
+  body::before, body::after {
+    content: "";
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(90px);
+    z-index: 0;
+    pointer-events: none;
+  }
+  body::before {
+    width: 520px; height: 520px;
+    background: rgba(169,112,255,0.35);
+    top: -160px; left: -120px;
+  }
+  body::after {
+    width: 480px; height: 480px;
+    background: rgba(123,63,196,0.28);
+    bottom: -180px; right: -100px;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  a { color: inherit; }
+
+  .wrap {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 0 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Gemeinsame Glasflächen-Basis — durchscheinend, weichgezeichnet,
+     dünner heller Rand statt Schatten. */
+  .glass {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+  }
+
+  /* ---------- Nav ---------- */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 18px 0;
+    background: rgba(14,16,22,0.55);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border-bottom: 1px solid var(--glass-border);
+  }
+  nav .wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .brand {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .brand span { color: var(--accent); }
+  nav .links {
+    display: flex;
+    gap: 8px;
+    font-size: 14px;
+  }
+  nav .links a {
+    text-decoration: none;
+    color: rgba(243,241,236,0.75);
+    transition: color 0.2s, background 0.2s;
+    padding: 8px 16px;
+    border-radius: 999px;
+  }
+  nav .links a:hover {
+    color: var(--paper);
+    background: rgba(255,255,255,0.08);
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    padding: 96px 0 88px;
+    border-bottom: 1px solid var(--line);
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 56px;
+    align-items: end;
+  }
+  .hero h1 {
+    font-size: 56px;
+    line-height: 1.08;
+    max-width: 560px;
+  }
+  .hero .lede {
+    margin-top: 24px;
+    font-size: 18px;
+    color: rgba(243,241,236,0.75);
+    max-width: 460px;
+  }
+  .hero-side {
+    font-size: 15px;
+    color: rgba(243,241,236,0.7);
+    padding: 24px;
+    border-radius: 20px;
+  }
+  .hero-side strong { color: var(--paper); display: block; margin-bottom: 6px; }
+
+  .cta-row {
+    margin-top: 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.92);
+    color: var(--ink);
+    text-decoration: none;
+    padding: 14px 26px;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 500;
+    border: 1px solid rgba(255,255,255,0.5);
+    box-shadow: 0 8px 24px rgba(169,112,255,0.25);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 30px rgba(169,112,255,0.4);
+  }
+  .btn-secondary {
+    text-decoration: none;
+    font-size: 15px;
+    color: rgba(243,241,236,0.8);
+    padding: 13px 22px;
+    border-radius: 999px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .btn-secondary:hover {
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.3);
+  }
+  .req {
+    margin-top: 14px;
+    font-size: 13px;
+    color: rgba(243,241,236,0.45);
+  }
+
+  /* ---------- Features ---------- */
+  .features {
+    padding: 88px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .section-head {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 56px;
+  }
+  .section-head h2 {
+    font-size: 34px;
+    max-width: 380px;
+  }
+  .section-head p {
+    color: rgba(243,241,236,0.65);
+    font-size: 16px;
+    align-self: end;
+    max-width: 380px;
+  }
+
+  .feature-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .feature-row {
+    display: grid;
+    grid-template-columns: 64px 1fr 1.4fr;
+    gap: 24px;
+    padding: 24px 28px;
+    align-items: baseline;
+    border-radius: 18px;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .feature-row:hover {
+    background: rgba(255,255,255,0.1);
+  }
+  .feature-row .num {
+    font-family: 'Fraunces', serif;
+    color: var(--accent);
+    font-size: 15px;
+  }
+  .feature-row h3 {
+    font-size: 20px;
+    font-weight: 500;
+  }
+  .feature-row p {
+    color: rgba(243,241,236,0.65);
+    font-size: 15px;
+    max-width: 480px;
+  }
+
+  /* ---------- Privacy strip ---------- */
+  .privacy {
+    padding: 88px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .privacy-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+  }
+  .privacy h2 {
+    font-size: 32px;
+    line-height: 1.2;
+  }
+  .privacy-points {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .privacy-point {
+    display: flex;
+    gap: 16px;
+    font-size: 15px;
+    color: rgba(243,241,236,0.8);
+    padding: 18px 22px;
+    border-radius: 16px;
+  }
+  .privacy-point .dot {
+    flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-top: 9px;
+  }
+  .privacy-point strong { color: var(--paper); }
+
+  /* ---------- Footer ---------- */
+  footer {
+    padding: 48px 0;
+  }
+  footer .wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: rgba(243,241,236,0.5);
+  }
+  footer a { text-decoration: none; color: rgba(243,241,236,0.7); }
+  footer a:hover { color: var(--paper); }
+
+  @media (max-width: 760px) {
+    .hero-grid, .section-head, .privacy-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 38px; }
+    .feature-row { grid-template-columns: 40px 1fr; }
+    .feature-row p { grid-column: 2; }
+    nav .links { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">収納 <span>Shuno</span></div>
+    <div class="links">
+      <a href="#funktionen">Funktionen</a>
+      <a href="#datenschutz">Datenschutz</a>
+      <a href="https://github.com/ozevstudio/shuno/releases">Versionen</a>
+      <a href="https://github.com/ozevstudio/shuno#readme">README</a>
+      <a href="https://github.com/ozevstudio/shuno">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <h1>Deine Zwischenablage merkt sich mehr, aber verrät nichts.</h1>
+      <p class="lede">Shuno sammelt, was du kopierst — Text, Links, Bilder, Code — und verschlüsselt es direkt auf deinem Mac. Kein Server, kein Tracking, kein Umweg.</p>
+      <div class="cta-row">
+        <a class="btn-primary" href="https://github.com/ozevstudio/shuno/releases/latest">
+          Für macOS herunterladen
+        </a>
+        <a class="btn-secondary" href="#funktionen">Was Shuno kann</a>
+      </div>
+      <p class="req">Kostenlos. Für Mac mit Apple Silicon.</p>
+    </div>
+    <div class="hero-side glass">
+      <strong>Warum noch ein Clipboard-Manager?</strong>
+      Die meisten speichern deinen Verlauf offen auf der Festplatte. Shuno verschlüsselt jeden Eintrag mit AES-256 und lässt sich per Touch ID sperren — gebaut für alles, was du eigentlich nicht nochmal tippen willst, aber auch nicht offen rumliegen haben möchtest.
+    </div>
+  </div>
+</section>
+
+<section class="features" id="funktionen">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Ein Verlauf, der mitdenkt</h2>
+      <p>Jeder Eintrag wird automatisch einsortiert und durchsuchbar gemacht — ganz ohne, dass du ihn selbst benennen musst.</p>
+    </div>
+    <div class="feature-list">
+      <div class="feature-row glass">
+        <span class="num">01</span>
+        <h3>Automatische Kategorien</h3>
+        <p>Text, Links, Bilder, Code und Dokumente werden erkannt und farblich unterschieden, sobald du kopierst.</p>
+      </div>
+      <div class="feature-row glass">
+        <span class="num">02</span>
+        <h3>Bilderkennung, komplett offline</h3>
+        <p>Text und grobe Motive in Bildern werden automatisch erkannt — such einfach nach "Rechnung" oder "Katze", auch wenn der Dateiname nichts verrät.</p>
+      </div>
+      <div class="feature-row glass">
+        <span class="num">03</span>
+        <h3>Verstecken statt löschen</h3>
+        <p>Sensible Einträge lassen sich per Touch ID oder Passwort verbergen, statt sie zu riskieren zu verlieren.</p>
+      </div>
+      <div class="feature-row glass">
+        <span class="num">04</span>
+        <h3>Papierkorb mit Frist</h3>
+        <p>Gelöschtes landet erst 30 Tage im Papierkorb, bevor es endgültig verschwindet — kein Klick zu viel, kein Verlust.</p>
+      </div>
+      <div class="feature-row glass">
+        <span class="num">05</span>
+        <h3>Überall per Tastenkürzel</h3>
+        <p>Ein frei wählbares Kürzel öffnet Shuno aus jeder App heraus, ohne den Fokus zu verlieren.</p>
+      </div>
+      <div class="feature-row glass">
+        <span class="num">06</span>
+        <h3>Textbausteine</h3>
+        <p>Adresse, Signatur, Standardantworten — feste Texte, die unabhängig vom Verlauf bestehen bleiben.</p>
+      </div>
+      <div class="feature-row glass">
+        <span class="num">07</span>
+        <h3>Link-Vorschau</h3>
+        <p>Kopierte Links zeigen automatisch Titel und Favicon der Zielseite, statt nur der nackten Adresse.</p>
+      </div>
+      <div class="feature-row glass">
+        <span class="num">08</span>
+        <h3>Im Finder anzeigen</h3>
+        <p>Bei verlinkten Dateien führt ein Klick direkt zur Originaldatei im Finder — ohne selbst danach suchen zu müssen.</p>
+      </div>
+      <div class="feature-row glass">
+        <span class="num">09</span>
+        <h3>Ursprungsbild wieder aufrufen</h3>
+        <p>Aus dem Internet kopierte Bilder merken sich ihre Quelle — ein Klick öffnet die Original-Webseite erneut im Browser.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="privacy" id="datenschutz">
+  <div class="wrap privacy-grid">
+    <h2>Verschlüsselt, bevor es die Festplatte berührt.</h2>
+    <div class="privacy-points">
+      <div class="privacy-point glass">
+        <span class="dot"></span>
+        <div><strong>AES-256-Verschlüsselung</strong> für jeden einzelnen Eintrag, nicht nur die versteckten.</div>
+      </div>
+      <div class="privacy-point glass">
+        <span class="dot"></span>
+        <div><strong>Schlüssel im macOS-Schlüsselbund</strong>, getrennt von den eigentlichen Daten gespeichert.</div>
+      </div>
+      <div class="privacy-point glass">
+        <span class="dot"></span>
+        <div><strong>Signierte Updates</strong> — jede neue Version wird vor der Installation kryptografisch geprüft.</div>
+      </div>
+      <div class="privacy-point glass">
+        <span class="dot"></span>
+        <div><strong>Ausgeschlossene Apps</strong> — Passwort-Manager & Co. lassen sich komplett von der Erfassung ausnehmen.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>Shuno — von <a href="https://github.com/ozevstudio">ozevstudio</a></span>
+    <div style="display:flex; gap:20px;">
+      <a href="https://github.com/ozevstudio/shuno/releases">Versionshistorie</a>
+      <a href="https://github.com/ozevstudio/shuno#readme">README</a>
+      <a href="https://github.com/ozevstudio/shuno">Quellcode</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
