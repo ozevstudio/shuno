@@ -75,6 +75,12 @@ Alle kopierten Inhalte werden ausschließlich lokal (oder optional in deiner pri
 
 Drei optionale Funktionen kontaktieren das Internet, nur wenn aktiv eingeschaltet oder ausgelöst: die Link-Vorschau (ruft die jeweilige Webseite auf, um Titel/Favicon zu laden), die Update-Prüfung (fragt eine kleine Textdatei ab, um auf neue Versionen hinzuweisen) und das Feedback-Formular (sendet deine Nachricht an einen externen Formular-Dienst). Keines davon sendet persönliche Daten ohne dein aktives Zutun.
 
+## Entwicklung mit KI
+
+Shuno wird von einer Person entwickelt – mit Unterstützung der KI **Claude** von Anthropic. Claude hat beim Programmieren, beim Design, bei den Sicherheitsfunktionen und bei Texten wie dieser Dokumentation geholfen.
+
+Alle Entscheidungen trifft der Entwickler selbst: Jede Änderung wird von ihm geprüft, getestet und erst dann veröffentlicht. Die KI hat keinen Zugriff auf deine Daten – Shuno sendet nichts an Claude oder andere KI-Dienste.
+
 ## Haftungsausschluss
 
 Dies ist ein privates Hobby-Projekt, kostenlos und ohne Gewinnabsicht bereitgestellt. Die Nutzung erfolgt auf eigene Verantwortung. Es wird keine Haftung für Datenverlust, Fehlfunktionen oder Schäden jeglicher Art übernommen, die durch die Nutzung dieser Software entstehen könnten. Es besteht kein Anspruch auf Support, Updates oder Fehlerbehebung.
