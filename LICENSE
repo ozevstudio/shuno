@@ -1,0 +1,32 @@
+Shuno – Nutzungsbedingungen
+Copyright (c) 2026 ozevstudio. Alle Rechte vorbehalten.
+
+1. Nutzung
+   Shuno darf kostenlos heruntergeladen und auf beliebig vielen eigenen
+   Macs privat und beruflich genutzt werden.
+
+2. Weitergabe
+   Die unveränderte DMG-Datei darf weitergegeben werden, wenn dabei auf
+   dieses Repository als offizielle Quelle verwiesen wird. Der Verkauf
+   von Shuno oder die Weitergabe veränderter Versionen ist nicht erlaubt.
+
+3. Veränderungen
+   Shuno darf nicht verändert, zurückentwickelt (Reverse Engineering),
+   neu signiert oder als Grundlage für andere Software verwendet werden,
+   soweit das Gesetz dies nicht ausdrücklich erlaubt.
+
+4. Keine Gewährleistung
+   Shuno wird so bereitgestellt, wie es ist, ohne jede Gewährleistung.
+   Eine Haftung für Datenverlust, Fehlfunktionen oder sonstige Schäden ist
+   ausgeschlossen, soweit gesetzlich zulässig. Es besteht kein Anspruch
+   auf Support, Updates oder Fehlerbehebung.
+
+5. Bestandteile Dritter
+   Shuno nutzt öffentliche Daten Dritter, die unter eigenen Lizenzen
+   stehen:
+   - Phishing.Database – MIT-Lizenz,
+     © 2018–2025 Mitchell Krog, Nissar Chababy und Mitwirkende
+     https://github.com/Phishing-Database/Phishing.Database
+   - List of Dirty, Naughty, Obscene and Otherwise Bad Words –
+     Creative Commons Namensnennung 4.0 International (CC BY 4.0)
+     https://github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words

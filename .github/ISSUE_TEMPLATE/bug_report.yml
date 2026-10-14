@@ -1,0 +1,44 @@
+name: Fehler melden
+description: Etwas funktioniert nicht wie erwartet.
+labels: ["fehler"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke fürs Melden! **Sicherheitslücken bitte nicht hier**, sondern wie in [SECURITY.md](https://github.com/ozevstudio/shuno/blob/main/SECURITY.md) beschrieben.
+        Bitte keine privaten Inhalte aus deinem Verlauf posten.
+  - type: input
+    id: version
+    attributes:
+      label: Shuno-Version
+      description: Steht unter Einstellungen → Allgemein.
+      placeholder: z. B. 3.0
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS-Version
+      placeholder: z. B. macOS 26.1
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: Was ist passiert?
+      description: Was hast du getan, was ist passiert, und was hättest du erwartet?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Schritte zum Nachstellen
+      placeholder: |
+        1. …
+        2. …
+        3. …
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Bildschirmfotos (optional)
+      description: Hier hineinziehen – vorher private Inhalte unkenntlich machen.

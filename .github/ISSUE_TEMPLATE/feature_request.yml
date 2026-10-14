@@ -1,0 +1,27 @@
+name: Idee vorschlagen
+description: Ein Vorschlag, wie Shuno besser werden kann.
+labels: ["idee"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Welches Problem soll gelöst werden?
+      description: Beschreibe die Situation, in der dir etwas fehlt.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Deine Idee
+      description: Wie könnte Shuno das lösen?
+  - type: dropdown
+    id: area
+    attributes:
+      label: Bereich
+      options:
+        - Verlauf und Suche
+        - Menüleiste
+        - Sicherheit und Datenschutz
+        - Barrierefreiheit
+        - Einstellungen
+        - Sonstiges
