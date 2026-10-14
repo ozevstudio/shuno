@@ -3,429 +3,454 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shuno — Privater Clipboard-Manager für den Mac</title>
+<title>Shuno – der sichere Clipboard-Manager für den Mac</title>
+<meta name="description" content="Shuno merkt sich, was du kopierst – verschlüsselt, mit Schutz vor Betrugslinks und ausgetauschten Kontonummern. Kostenlos für macOS.">
+<link rel="icon" type="image/png" href="icon.png">
 <style>
   :root {
-    --bg: #1C1C1E;
-    --bg-elevated: #242426;
+    --canvas: #17171B;
+    --canvas-2: #1D1D22;
     --text: #F2F2F7;
-    --text-secondary: rgba(242,242,247,0.6);
-    --text-tertiary: rgba(242,242,247,0.4);
-    --separator: rgba(255,255,255,0.09);
-    --pink: #FF30B0;
-    --blue: #7692FF;
-    --gray-accent: #A8A3A3;
-    --green: #3DDC84;
-    --orange: #FF9F40;
-    --violet: #A970FF;
-    --radius-s: 8px;
-    --radius-m: 12px;
-    --radius-l: 16px;
+    --text-2: rgba(242,242,247,0.66);
+    --text-3: rgba(242,242,247,0.44);
+    --line: rgba(255,255,255,0.08);
+    --glass-top: rgba(255,255,255,0.075);
+    --glass-bottom: rgba(255,255,255,0.035);
+    --glass-border: rgba(255,255,255,0.11);
+    --brand: #8E8CFF;
+    --brand-a: #8B88FF;
+    --brand-b: #5E5BEB;
+    --mint: #2EC4B6;
+    --magenta: #A62FA8;
+    --violet: #4A14E6;
+    --green: #30D158;
+    --orange: #FFA84A;
+    --red: #FF6B63;
+    --c-text: #FF30B0;
+    --c-link: #7692FF;
+    --c-image: #A8A3A3;
+    --c-code: #3DDC84;
+    --c-doc: #FF9F40;
+    --c-snippet: #A970FF;
+    --c-article: #2EC4B6;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
 
   body {
-    background: var(--bg);
+    background: var(--canvas);
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-    line-height: 1.5;
+    line-height: 1.55;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
-
   a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; border-radius: 8px; }
 
-  .wrap {
-    max-width: 980px;
-    margin: 0 auto;
-    padding: 0 32px;
+  /* Farbschein wie im App-Fenster */
+  .glow {
+    position: absolute; inset: 0 0 auto 0; height: 900px; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(600px 260px at 38% 0%, rgba(166,47,168,0.30), transparent 70%),
+      radial-gradient(700px 300px at 55% 4%, rgba(74,20,230,0.30), transparent 70%),
+      radial-gradient(420px 220px at 92% 12%, rgba(46,196,182,0.16), transparent 70%);
   }
 
-  /* ---------- Nav ---------- */
+  .wrap { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  .glass {
+    background: linear-gradient(180deg, var(--glass-top), var(--glass-bottom));
+    border: 1px solid var(--glass-border);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px rgba(0,0,0,0.28);
+  }
+
+  /* ---------- Navigation ---------- */
   nav {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    padding: 14px 0;
-    background: rgba(28,28,30,0.8);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border-bottom: 1px solid var(--separator);
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(23,23,27,0.72);
+    backdrop-filter: blur(20px) saturate(170%);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    border-bottom: 1px solid var(--line);
   }
-  nav .wrap { display: flex; justify-content: space-between; align-items: center; }
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 58px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; text-decoration: none; }
+  .brand img { width: 26px; height: 26px; border-radius: 7px; }
+  .nav-links { display: flex; align-items: center; gap: 2px; }
+  .nav-links a {
+    text-decoration: none; color: var(--text-2); font-size: 13.5px; font-weight: 500;
+    padding: 7px 12px; border-radius: 999px; transition: background .15s, color .15s;
   }
-  .brand .icon {
-    width: 22px; height: 22px;
-    border-radius: 6px;
-    background: linear-gradient(145deg, var(--violet), #7B3FC4);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px;
-    font-weight: 600;
+  .nav-links a:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+  .nav-links .pill {
+    color: #fff; background: linear-gradient(180deg, var(--brand-a), var(--brand-b));
+    border: 1px solid rgba(255,255,255,0.18); margin-left: 8px;
   }
-  nav .links { display: flex; gap: 2px; align-items: center; }
-  nav .links a {
-    text-decoration: none;
-    color: var(--text-secondary);
-    font-size: 13px;
-    font-weight: 500;
-    padding: 6px 13px;
-    border-radius: 999px;
-    transition: color 0.15s, background 0.15s;
-  }
-  nav .links a:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+  .nav-links .pill:hover { color: #fff; background: linear-gradient(180deg, #9A97FF, #6966F2); }
+  @media (max-width: 760px) { .nav-links a:not(.pill) { display: none; } }
 
-  /* ---------- Hero ---------- */
-  .hero {
-    padding: 88px 0 0;
-    text-align: center;
-  }
-  .hero-icon {
-    width: 88px; height: 88px;
-    margin: 0 auto 28px;
-    border-radius: 22px;
-    background: linear-gradient(160deg, #2A2A2E, #19191B);
-    border: 1px solid rgba(255,255,255,0.08);
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.35);
-  }
-  .hero-icon svg { width: 40px; height: 40px; }
-
-  .hero h1 {
-    font-size: 42px;
-    font-weight: 650;
-    letter-spacing: -0.025em;
-    line-height: 1.15;
-    max-width: 620px;
-    margin: 0 auto;
-  }
-  .hero .lede {
-    margin: 20px auto 0;
-    font-size: 17px;
-    color: var(--text-secondary);
-    max-width: 460px;
-  }
-
-  .cta-row {
-    margin-top: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    flex-wrap: wrap;
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex; align-items: center; gap: 9px; text-decoration: none;
+    font-size: 15px; font-weight: 600; padding: 13px 24px; border-radius: 999px;
+    transition: transform .15s, background .15s;
   }
   .btn-primary {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--violet);
     color: #fff;
-    text-decoration: none;
-    padding: 11px 22px;
-    border-radius: 999px;
-    font-size: 14px;
-    font-weight: 600;
-    transition: background 0.15s ease, transform 0.15s ease;
+    background: linear-gradient(180deg, var(--brand-a), var(--brand-b));
+    border: 1px solid rgba(255,255,255,0.18);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 1.5px 3px rgba(0,0,0,0.3);
   }
-  .btn-primary:hover { background: #B885FF; transform: translateY(-1px); }
-  .btn-secondary {
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text);
-    padding: 11px 20px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.1);
-    transition: background 0.15s ease;
-  }
-  .btn-secondary:hover { background: rgba(255,255,255,0.13); }
-  .req { margin-top: 14px; font-size: 12px; color: var(--text-tertiary); }
+  .btn-primary:hover { transform: translateY(-1px); background: linear-gradient(180deg, #9A97FF, #6966F2); }
+  .btn-glass { color: var(--text); }
+  .btn-glass:hover { background: rgba(255,255,255,0.1); }
 
-  /* ---------- Product shot (mimics the actual app window) ---------- */
-  .shot-frame {
-    margin: 64px auto 0;
-    max-width: 880px;
-    border-radius: 14px 14px 0 0;
-    overflow: hidden;
-    border: 1px solid var(--separator);
-    border-bottom: none;
-    box-shadow: 0 40px 90px rgba(0,0,0,0.5);
+  /* ---------- Hero ---------- */
+  .hero { text-align: center; padding: 84px 0 0; }
+  .hero-icon { width: 112px; height: 112px; border-radius: 26px; box-shadow: 0 22px 50px rgba(74,20,230,0.35); }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 26px;
+    font-size: 12.5px; font-weight: 600; color: var(--brand);
+    padding: 5px 12px; border-radius: 999px; background: rgba(142,140,255,0.12); border: 1px solid rgba(142,140,255,0.25);
   }
-  .shot-titlebar {
-    height: 38px;
-    background: #29292B;
-    display: flex; align-items: center;
-    padding: 0 14px;
-    gap: 7px;
-    border-bottom: 1px solid var(--separator);
+  .hero h1 {
+    margin: 18px auto 0; max-width: 760px;
+    font-size: clamp(34px, 6vw, 58px); line-height: 1.07; letter-spacing: -0.03em; font-weight: 800;
   }
-  .shot-titlebar .dot { width: 11px; height: 11px; border-radius: 50%; }
-  .shot-body {
-    display: flex;
-    background: #1E1E20;
-    min-height: 340px;
+  .hero h1 span {
+    background: linear-gradient(90deg, #C9A0FF, var(--brand) 45%, var(--mint));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  .shot-sidebar {
-    width: 190px;
-    background: #232325;
-    border-right: 1px solid var(--separator);
-    padding: 14px 10px;
-    flex-shrink: 0;
-  }
-  .shot-nav-item {
-    display: flex; align-items: center; gap: 9px;
-    padding: 7px 10px;
-    border-radius: 7px;
-    font-size: 12.5px;
-    color: var(--text-secondary);
-    margin-bottom: 2px;
-  }
-  .shot-nav-item.active { background: rgba(169,112,255,0.18); color: var(--text); }
-  .shot-nav-item .sw { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .shot-main { flex: 1; padding: 18px 20px; }
-  .shot-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 11px 14px;
-    border-radius: 10px;
-    margin-bottom: 8px;
-    background: rgba(255,255,255,0.035);
-    border: 1px solid rgba(255,255,255,0.05);
-  }
-  .shot-row .sw { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .shot-row .text { flex: 1; }
-  .shot-row .title { font-size: 12.5px; color: var(--text); margin-bottom: 2px; }
-  .shot-row .meta { font-size: 11px; color: var(--text-tertiary); }
+  .lede { margin: 20px auto 0; max-width: 560px; font-size: 18px; color: var(--text-2); }
+  .cta { margin-top: 32px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .meta { margin-top: 14px; font-size: 12.5px; color: var(--text-3); }
 
-  /* ---------- Features ---------- */
-  .features {
-    padding: 88px 0;
-    border-top: 1px solid var(--separator);
+  /* ---------- App-Fenster (Nachbau) ---------- */
+  .shot { margin: 64px auto 0; max-width: 1000px; border-radius: 22px; overflow: hidden; }
+  .shot-inner { display: grid; grid-template-columns: 200px 1fr 260px; min-height: 430px; background: rgba(23,23,27,0.92); }
+  .shot-bar { height: 34px; display: flex; align-items: center; gap: 8px; padding: 0 14px; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--line); }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .shot-inner > * { min-width: 0; }
+  .side { padding: 14px 10px; background: rgba(255,255,255,0.03); border-right: 1px solid var(--line); }
+  .tipcard { padding: 10px 11px; border-radius: 12px; margin-bottom: 12px; font-size: 11px; color: var(--text-2); }
+  .tipcard b { display: block; font-size: 10px; letter-spacing: .06em; color: var(--brand); margin-bottom: 3px; }
+  .srow { display: flex; align-items: center; gap: 9px; padding: 6px 9px; border-radius: 9px; font-size: 12.5px; color: var(--text-2); }
+  .srow .ic { width: 14px; height: 14px; border-radius: 4px; flex: none; }
+  .srow .n { margin-left: auto; font-size: 11px; color: var(--text-3); }
+  .srow.sel { color: var(--text); font-weight: 600; background: linear-gradient(180deg, rgba(142,140,255,0.42), rgba(142,140,255,0.24)); border: 1px solid rgba(142,140,255,0.5); }
+  .main { padding: 14px 14px 0; }
+  .search { height: 32px; border-radius: 999px; display: flex; align-items: center; padding: 0 14px; font-size: 12px; color: var(--text-3); margin-bottom: 12px; }
+  .glabel { font-size: 10px; letter-spacing: .1em; color: var(--text-3); margin: 6px 4px; }
+  .row { display: flex; gap: 11px; align-items: center; padding: 9px 10px; border-radius: 12px; margin-bottom: 4px; }
+  .row.focus { background: linear-gradient(180deg, rgba(142,140,255,0.30), rgba(142,140,255,0.16)); border: 1px solid rgba(142,140,255,0.45); }
+  .tile { width: 34px; height: 34px; border-radius: 10px; flex: none; position: relative; box-shadow: inset 0 1px 0 rgba(255,255,255,0.3); }
+  .tile::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(30px 20px at 25% 0%, rgba(255,255,255,0.35), transparent 70%); }
+  .rt { min-width: 0; flex: 1; }
+  .rt b { display: block; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rt span { font-size: 11px; color: var(--text-3); }
+  .warn { color: var(--orange); }
+  .time { font-size: 10.5px; color: var(--text-3); }
+  .insp { padding: 14px; border-left: 1px solid var(--line); }
+  .hero-prev { height: 120px; border-radius: 14px; background: linear-gradient(135deg, var(--c-link), rgba(118,146,255,0.45)); display: grid; place-items: center; font-size: 13px; font-weight: 600; }
+  .itag { font-size: 10px; font-weight: 700; letter-spacing: .08em; color: var(--c-link); margin: 12px 0 4px; }
+  .ititle { font-size: 14px; font-weight: 700; }
+  .wbox { margin-top: 10px; padding: 10px; border-radius: 12px; font-size: 11px; background: rgba(255,107,99,0.12); border: 1px solid rgba(255,107,99,0.35); color: var(--text-2); }
+  .wbox b { color: var(--red); display: block; margin-bottom: 2px; }
+  .copybtn { margin-top: 12px; text-align: center; padding: 9px; border-radius: 999px; font-size: 12px; font-weight: 600; color: #fff; background: linear-gradient(180deg, var(--brand-a), var(--brand-b)); border: 1px solid rgba(255,255,255,0.18); }
+  @media (max-width: 860px) {
+    .shot-inner { grid-template-columns: 1fr; }
+    .side, .insp { display: none; }
   }
-  .section-head { text-align: center; max-width: 480px; margin: 0 auto 48px; }
-  .section-head h2 { font-size: 28px; font-weight: 650; letter-spacing: -0.02em; }
-  .section-head p { margin-top: 12px; color: var(--text-secondary); font-size: 15px; }
 
-  .feature-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1px;
-    background: var(--separator);
-    border: 1px solid var(--separator);
-    border-radius: var(--radius-l);
-    overflow: hidden;
-  }
-  .feature-card {
-    background: var(--bg-elevated);
-    padding: 26px 24px;
-  }
-  .feature-card .icon-badge {
-    width: 30px; height: 30px;
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 16px;
-  }
-  .feature-card .icon-badge .dot { width: 8px; height: 8px; border-radius: 50%; background: #fff; }
-  .feature-card h3 { font-size: 14.5px; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.01em; }
-  .feature-card p { color: var(--text-secondary); font-size: 13px; line-height: 1.55; }
+  /* ---------- Abschnitte ---------- */
+  section { padding: 110px 0 0; }
+  .head { max-width: 640px; }
+  .kicker { font-size: 12.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--brand); }
+  h2 { margin-top: 10px; font-size: clamp(28px, 4.2vw, 40px); line-height: 1.12; letter-spacing: -0.025em; font-weight: 800; }
+  .sub { margin-top: 14px; font-size: 17px; color: var(--text-2); }
 
-  /* ---------- Privacy ---------- */
-  .privacy { padding: 88px 0; border-top: 1px solid var(--separator); }
-  .privacy-grid { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 56px; align-items: center; }
-  .privacy h2 { font-size: 28px; font-weight: 650; letter-spacing: -0.02em; line-height: 1.25; }
-  .privacy .sub { margin-top: 14px; color: var(--text-secondary); font-size: 15px; max-width: 320px; }
-  .privacy-points { display: flex; flex-direction: column; gap: 1px; background: var(--separator); border: 1px solid var(--separator); border-radius: var(--radius-l); overflow: hidden; }
-  .privacy-point { display: flex; gap: 14px; align-items: flex-start; font-size: 14px; padding: 16px 18px; background: var(--bg-elevated); }
-  .privacy-point .check {
-    flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%;
-    background: var(--violet);
-    display: flex; align-items: center; justify-content: center;
-    margin-top: 1px;
+  .grid { margin-top: 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+  .card { padding: 22px; border-radius: 18px; }
+  .card .ic {
+    width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; margin-bottom: 14px;
   }
-  .privacy-point .check svg { width: 10px; height: 10px; }
-  .privacy-point strong { display: block; color: var(--text); margin-bottom: 2px; font-size: 14px; }
-  .privacy-point span.desc { color: var(--text-secondary); font-size: 13px; }
+  .card .ic svg { width: 19px; height: 19px; }
+  .card h3 { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+  .card p { margin-top: 6px; font-size: 14px; color: var(--text-2); }
+  .kbd {
+    display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 7px; border-radius: 6px; color: var(--text);
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.13);
+  }
 
-  /* ---------- Footer ---------- */
-  footer { padding: 40px 0; border-top: 1px solid var(--separator); }
-  footer .wrap { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-tertiary); flex-wrap: wrap; gap: 14px; }
-  footer a { text-decoration: none; color: var(--text-secondary); }
+  /* Sicherheit */
+  .sec { display: grid; grid-template-columns: 1.05fr 1fr; gap: 18px; margin-top: 40px; align-items: start; }
+  @media (max-width: 900px) { .sec { grid-template-columns: 1fr; } }
+  .selftest { padding: 22px; border-radius: 20px; }
+  .st-head { display: flex; gap: 14px; align-items: center; padding: 16px; border-radius: 16px; background: rgba(48,209,88,0.1); border: 1px solid rgba(48,209,88,0.25); }
+  .st-head svg { width: 30px; height: 30px; flex: none; }
+  .st-head b { font-size: 16px; display: block; }
+  .st-head span { font-size: 12.5px; color: var(--text-2); }
+  .st-row { display: flex; align-items: center; gap: 12px; padding: 12px 4px; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .st-row:last-child { border-bottom: 0; }
+  .chip { margin-left: auto; font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; color: var(--green); background: rgba(48,209,88,0.14); white-space: nowrap; }
+  .st-ic { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: rgba(48,209,88,0.16); flex: none; }
+  .st-ic svg { width: 15px; height: 15px; }
+  .st-row small { display: block; font-size: 12px; color: var(--text-3); }
+  .seclist { display: grid; gap: 14px; }
+
+  /* Transparenz */
+  .net { margin-top: 40px; border-radius: 20px; overflow: hidden; }
+  .net-row { display: flex; gap: 14px; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+  .net-row:last-child { border-bottom: 0; }
+  .net-row p { font-size: 14px; color: var(--text-2); }
+  .net-row b { display: block; font-size: 15px; color: var(--text); }
+  .state { margin-left: auto; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; white-space: nowrap; color: #64D2FF; background: rgba(100,210,255,0.14); }
+  .state.off { color: var(--text-3); background: rgba(255,255,255,0.06); }
+  .net-hero { padding: 18px 20px; background: rgba(48,209,88,0.08); border-bottom: 1px solid var(--line); font-size: 15px; }
+  .net-hero b { color: var(--green); }
+
+  /* Installation */
+  .steps { margin-top: 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; counter-reset: s; }
+  @media (max-width: 800px) { .steps { grid-template-columns: 1fr; } }
+  .step { padding: 22px; border-radius: 18px; }
+  .step::before {
+    counter-increment: s; content: counter(s);
+    display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
+    font-weight: 800; font-size: 14px; color: #fff; margin-bottom: 12px;
+    background: linear-gradient(180deg, var(--brand-a), var(--brand-b));
+  }
+  .step h3 { font-size: 16px; }
+  .step p { margin-top: 6px; font-size: 14px; color: var(--text-2); }
+
+  /* Abschluss */
+  .final { margin-top: 110px; text-align: center; padding: 56px 24px; border-radius: 26px; position: relative; overflow: hidden; }
+  .final::before { content: ""; position: absolute; inset: 0; background: radial-gradient(500px 220px at 50% 0%, rgba(74,20,230,0.35), transparent 70%); pointer-events: none; }
+  .final > * { position: relative; }
+
+  footer { margin-top: 80px; border-top: 1px solid var(--line); padding: 36px 0 48px; font-size: 13px; color: var(--text-3); }
+  footer .cols { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 28px; }
+  @media (max-width: 760px) { footer .cols { grid-template-columns: 1fr; } }
+  footer h4 { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-2); margin-bottom: 10px; }
+  footer a { display: block; text-decoration: none; color: var(--text-3); padding: 3px 0; }
   footer a:hover { color: var(--text); }
-  footer .footer-links { display: flex; gap: 18px; }
-
-  @media (max-width: 900px) {
-    .feature-grid { grid-template-columns: repeat(2, 1fr); }
-    .shot-sidebar { display: none; }
-  }
-  @media (max-width: 760px) {
-    .privacy-grid { grid-template-columns: 1fr; }
-    .feature-grid { grid-template-columns: 1fr; }
-    nav .links { display: none; }
-    .hero h1 { font-size: 32px; }
-    .shot-frame { margin-left: -32px; margin-right: -32px; border-radius: 0; border-left: none; border-right: none; }
-  }
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  footer p { margin-bottom: 8px; }
 </style>
 </head>
 <body>
+<div class="glow" aria-hidden="true"></div>
 
-<nav>
+<nav aria-label="Hauptnavigation">
   <div class="wrap">
-    <div class="brand"><span class="icon">収</span> Shuno</div>
-    <div class="links">
+    <a class="brand" href="#top"><img src="icon.png" alt="">Shuno</a>
+    <div class="nav-links">
       <a href="#funktionen">Funktionen</a>
-      <a href="#datenschutz">Datenschutz</a>
+      <a href="#sicherheit">Sicherheit</a>
+      <a href="#transparenz">Transparenz</a>
+      <a href="#installation">Installation</a>
       <a href="https://github.com/ozevstudio/shuno/releases">Versionen</a>
-      <a href="https://github.com/ozevstudio/shuno#readme">README</a>
-      <a href="https://github.com/ozevstudio/shuno">GitHub</a>
+      <a class="pill" href="https://github.com/ozevstudio/shuno/releases/latest">Laden</a>
     </div>
   </div>
 </nav>
 
-<section class="hero">
+<main id="top">
   <div class="wrap">
-    <div class="hero-icon">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="7" y="2" width="10" height="4" rx="1.5" fill="#A970FF"/>
-        <rect x="4" y="5" width="16" height="17" rx="3" stroke="#F2F2F7" stroke-width="1.6"/>
-        <line x1="8" y1="11" x2="16" y2="11" stroke="#F2F2F7" stroke-width="1.4" stroke-linecap="round"/>
-        <line x1="8" y1="15" x2="13" y2="15" stroke="#F2F2F7" stroke-width="1.4" stroke-linecap="round"/>
-      </svg>
-    </div>
-    <h1>Deine Zwischenablage, sicher aufbewahrt.</h1>
-    <p class="lede">Shuno merkt sich, was du kopierst — Text, Links, Bilder, Code — und verschlüsselt jeden Eintrag direkt auf deinem Mac.</p>
-    <div class="cta-row">
-      <a class="btn-primary" href="https://github.com/ozevstudio/shuno/releases/latest">Für macOS herunterladen</a>
-      <a class="btn-secondary" href="#funktionen">Was Shuno kann</a>
-    </div>
-    <p class="req">Kostenlos · Für Mac mit Apple Silicon</p>
-
-    <div class="shot-frame">
-      <div class="shot-titlebar">
-        <div class="dot" style="background:#FF5F57"></div>
-        <div class="dot" style="background:#FEBC2E"></div>
-        <div class="dot" style="background:#28C840"></div>
+    <!-- Hero -->
+    <header class="hero">
+      <img class="hero-icon" src="icon.png" alt="Shuno-App-Symbol" width="112" height="112">
+      <div><span class="eyebrow">Neu: Version 3.0</span></div>
+      <h1>Deine Zwischenablage.<br><span>Sicher aufbewahrt.</span></h1>
+      <p class="lede">Shuno merkt sich alles, was du kopierst – verschlüsselt auf deinem Mac. Und warnt dich, bevor ein Betrugslink oder eine ausgetauschte Kontonummer Schaden anrichtet.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="https://github.com/ozevstudio/shuno/releases/latest">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2v8m0 0l-3.2-3.2M8 10l3.2-3.2M3 13h10" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Für macOS laden
+        </a>
+        <a class="btn btn-glass glass" href="#funktionen">Was Shuno kann</a>
       </div>
-      <div class="shot-body">
-        <div class="shot-sidebar">
-          <div class="shot-nav-item active"><span class="sw" style="background:var(--text-secondary)"></span>Alle</div>
-          <div class="shot-nav-item"><span class="sw" style="background:var(--pink)"></span>Text</div>
-          <div class="shot-nav-item"><span class="sw" style="background:var(--blue)"></span>Links</div>
-          <div class="shot-nav-item"><span class="sw" style="background:var(--gray-accent)"></span>Bilder</div>
-          <div class="shot-nav-item"><span class="sw" style="background:var(--green)"></span>Code</div>
-          <div class="shot-nav-item"><span class="sw" style="background:var(--orange)"></span>Dokumente</div>
-          <div class="shot-nav-item"><span class="sw" style="background:var(--violet)"></span>Textbausteine</div>
+      <p class="meta">Kostenlos · macOS 26 oder neuer · Mac mit Apple Silicon</p>
+    </header>
+
+    <!-- Nachbau des App-Fensters -->
+    <figure class="shot glass" aria-label="So sieht Shuno aus: Seitenleiste, Verlauf und Vorschau mit Warnung vor einem gefälschten Link">
+      <div class="shot-bar" aria-hidden="true">
+        <span class="dot" style="background:#FF5F57"></span><span class="dot" style="background:#FEBC2E"></span><span class="dot" style="background:#28C840"></span>
+      </div>
+      <div class="shot-inner" aria-hidden="true">
+        <div class="side">
+          <div class="tipcard glass"><b>SHUNO-TIPP</b>⌘1 bis ⌘9 kopieren in der Menüleiste sofort.</div>
+          <div class="srow sel"><span class="ic" style="background:var(--brand)"></span>Alle<span class="n">128</span></div>
+          <div class="srow"><span class="ic" style="background:#FFD60A"></span>Favoriten<span class="n">9</span></div>
+          <div class="srow"><span class="ic" style="background:var(--c-text)"></span>Text<span class="n">54</span></div>
+          <div class="srow"><span class="ic" style="background:var(--c-link)"></span>Links<span class="n">31</span></div>
+          <div class="srow"><span class="ic" style="background:var(--c-image)"></span>Bilder<span class="n">18</span></div>
+          <div class="srow"><span class="ic" style="background:var(--c-code)"></span>Code<span class="n">12</span></div>
+          <div class="srow"><span class="ic" style="background:var(--c-doc)"></span>Dokumente<span class="n">7</span></div>
+          <div class="srow"><span class="ic" style="background:var(--c-snippet)"></span>Textbausteine<span class="n">6</span></div>
         </div>
-        <div class="shot-main">
-          <div class="shot-row"><span class="sw" style="background:var(--blue)"></span><div class="text"><div class="title">apple.com/de/mac-studio</div><div class="meta">vor 2 Minuten</div></div></div>
-          <div class="shot-row"><span class="sw" style="background:var(--green)"></span><div class="text"><div class="title">func encrypt(_ data: Data) -&gt; Data?</div><div class="meta">vor 8 Minuten</div></div></div>
-          <div class="shot-row"><span class="sw" style="background:var(--gray-accent)"></span><div class="text"><div class="title">Screenshot_19_42.png</div><div class="meta">vor 14 Minuten</div></div></div>
-          <div class="shot-row"><span class="sw" style="background:var(--orange)"></span><div class="text"><div class="title">Rechnung_September.pdf</div><div class="meta">vor 31 Minuten</div></div></div>
-          <div class="shot-row"><span class="sw" style="background:var(--violet)"></span><div class="text"><div class="title">Meine Adresse</div><div class="meta">Textbaustein</div></div></div>
+        <div class="main">
+          <div class="search glass">Suchen …</div>
+          <div class="glabel">HEUTE</div>
+          <div class="row focus"><span class="tile" style="background:linear-gradient(135deg,var(--c-link),rgba(118,146,255,.5))"></span><div class="rt"><b>paypa1.com/login</b><span class="warn">⚠ Sieht aus wie „paypal“, ist es aber nicht</span></div><span class="time">vor 2 Min.</span></div>
+          <div class="row"><span class="tile" style="background:linear-gradient(135deg,var(--c-text),rgba(255,48,176,.5))"></span><div class="rt"><b>Treffen am Donnerstag um 15 Uhr</b><span>Text · Notizen</span></div><span class="time">09:41</span></div>
+          <div class="row"><span class="tile" style="background:linear-gradient(135deg,var(--c-snippet),rgba(169,112,255,.5))"></span><div class="rt"><b>Meine Adresse</b><span>Baustein · immer griffbereit</span></div><span class="time">09:12</span></div>
+          <div class="row"><span class="tile" style="background:linear-gradient(135deg,var(--c-code),rgba(61,220,132,.5))"></span><div class="rt"><b>func copyBackToPasteboard(_ item:)</b><span>Code · 14 Zeilen</span></div><span class="time">08:55</span></div>
+          <div class="row"><span class="tile" style="background:linear-gradient(135deg,var(--c-doc),rgba(255,159,64,.5))"></span><div class="rt"><b>Rechnung_Oktober.pdf</b><span>PDF-Datei</span></div><span class="time">08:30</span></div>
+        </div>
+        <div class="insp">
+          <div class="hero-prev">paypa1.com</div>
+          <div class="itag">LINK</div>
+          <div class="ititle">paypa1.com/login</div>
+          <div class="wbox"><b>Vorsicht bei diesem Link</b>Sieht aus wie „paypal“, ist es aber nicht. Shuno fragt nach, bevor du ihn kopierst oder öffnest.</div>
+          <div class="copybtn">Kopieren</div>
         </div>
       </div>
-    </div>
-  </div>
-</section>
+    </figure>
 
-<section class="features" id="funktionen">
-  <div class="wrap">
-    <div class="section-head">
-      <h2>Ein Verlauf, der mitdenkt</h2>
-      <p>Jeder Eintrag wird automatisch einsortiert und durchsuchbar gemacht.</p>
-    </div>
-    <div class="feature-grid">
-      <div class="feature-card">
-        <div class="icon-badge" style="background:var(--pink)"><span class="dot"></span></div>
-        <h3>Automatische Kategorien</h3>
-        <p>Text, Links, Bilder, Code und Dokumente werden erkannt und farblich unterschieden.</p>
+    <!-- Funktionen -->
+    <section id="funktionen" aria-labelledby="f-h">
+      <div class="head">
+        <div class="kicker">Funktionen</div>
+        <h2 id="f-h">Alles, was du kopierst. Sofort wiederfinden.</h2>
+        <p class="sub">Shuno sortiert automatisch, zeigt dir rechts die ganze Vorschau – und ist mit einem Tastendruck aus jeder App heraus da.</p>
       </div>
-      <div class="feature-card">
-        <div class="icon-badge" style="background:var(--violet)"><span class="dot"></span></div>
-        <h3>Bilderkennung, offline</h3>
-        <p>Text und grobe Motive in Bildern werden automatisch erkannt und durchsuchbar gemacht.</p>
+      <div class="grid">
+        <article class="card glass">
+          <div class="ic" style="background:rgba(142,140,255,.16)"><svg viewBox="0 0 20 20" fill="none"><rect x="2.5" y="3.5" width="15" height="13" rx="2.5" stroke="#8E8CFF" stroke-width="1.6"/><path d="M8 3.5v13" stroke="#8E8CFF" stroke-width="1.6"/></svg></div>
+          <h3>Liste und Vorschau</h3>
+          <p>Links dein Verlauf, rechts alles zum gewählten Eintrag – auch PDFs, Bilder und Code. Mit <span class="kbd">↑</span> <span class="kbd">↓</span> blätterst du ohne Maus.</p>
+        </article>
+        <article class="card glass">
+          <div class="ic" style="background:rgba(46,196,182,.16)"><svg viewBox="0 0 20 20" fill="none"><rect x="2.5" y="2.5" width="15" height="4" rx="1.5" stroke="#2EC4B6" stroke-width="1.6"/><path d="M5 10h10M5 13.5h7" stroke="#2EC4B6" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+          <h3>Immer in der Menüleiste</h3>
+          <p>Deine letzten Einträge mit einem Klick. <span class="kbd">⌘1</span> bis <span class="kbd">⌘9</span> kopieren sofort, <span class="kbd">⇧⌘V</span> öffnet Shuno überall.</p>
+        </article>
+        <article class="card glass">
+          <div class="ic" style="background:rgba(169,112,255,.16)"><svg viewBox="0 0 20 20" fill="none"><path d="M5 4h7a3 3 0 010 6H5zM5 10h8a3 3 0 010 6H5z" stroke="#A970FF" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+          <h3>Textbausteine mit Stil</h3>
+          <p>Adresse, Signatur, Antworten – <b>fett</b>, <i>kursiv</i> und mit Aufzählungen. Kommt formatiert in Mail &amp; Co. an.</p>
+        </article>
+        <article class="card glass">
+          <div class="ic" style="background:rgba(255,159,64,.16)"><svg viewBox="0 0 20 20" fill="none"><path d="M5.5 2.5h6l3 3v12h-9z" stroke="#FF9F40" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 10h5M8 13h4" stroke="#FF9F40" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+          <h3>PDFs und Dokumente</h3>
+          <p>Direkt in der Vorschau lesen, im Finder zeigen oder in Vorschau öffnen – deine Anmerkungen bleiben erhalten.</p>
+        </article>
+        <article class="card glass">
+          <div class="ic" style="background:rgba(255,48,176,.16)"><svg viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="5.5" stroke="#FF30B0" stroke-width="1.6"/><path d="M13 13l4 4" stroke="#FF30B0" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+          <h3>Findet sogar Text in Bildern</h3>
+          <p>Die Suche durchsucht Text, Links, Code und Screenshots – die Texterkennung läuft komplett auf deinem Mac.</p>
+        </article>
+        <article class="card glass">
+          <div class="ic" style="background:rgba(100,210,255,.16)"><svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="4.5" r="1.8" stroke="#64D2FF" stroke-width="1.6"/><path d="M4 8h12M10 8v4.5m0 0L7 17m3-4.5l3 4.5" stroke="#64D2FF" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+          <h3>Für alle gemacht</h3>
+          <p>Textgröße, Kontrast, weniger Bewegung – und jeder Tastenbefehl lässt sich frei belegen, auch für besondere Eingabegeräte.</p>
+        </article>
       </div>
-      <div class="feature-card">
-        <div class="icon-badge" style="background:var(--green)"><span class="dot"></span></div>
-        <h3>Verstecken statt löschen</h3>
-        <p>Sensible Einträge lassen sich per Touch ID oder Passwort verbergen.</p>
-      </div>
-      <div class="feature-card">
-        <div class="icon-badge" style="background:var(--blue)"><span class="dot"></span></div>
-        <h3>Papierkorb mit Frist</h3>
-        <p>Gelöschtes landet erst 30 Tage im Papierkorb, bevor es endgültig verschwindet.</p>
-      </div>
-      <div class="feature-card">
-        <div class="icon-badge" style="background:var(--orange)"><span class="dot"></span></div>
-        <h3>Überall per Tastenkürzel</h3>
-        <p>Ein frei wählbares Kürzel öffnet Shuno aus jeder App heraus.</p>
-      </div>
-      <div class="feature-card">
-        <div class="icon-badge" style="background:var(--pink)"><span class="dot"></span></div>
-        <h3>Textbausteine</h3>
-        <p>Feste Texte wie Adresse oder Signatur, unabhängig vom Verlauf.</p>
-      </div>
-      <div class="feature-card">
-        <div class="icon-badge" style="background:var(--violet)"><span class="dot"></span></div>
-        <h3>Link-Vorschau</h3>
-        <p>Kopierte Links zeigen automatisch Titel und Favicon der Zielseite.</p>
-      </div>
-      <div class="feature-card">
-        <div class="icon-badge" style="background:var(--green)"><span class="dot"></span></div>
-        <h3>Im Finder anzeigen</h3>
-        <p>Bei verlinkten Dateien führt ein Klick direkt zur Originaldatei.</p>
-      </div>
-      <div class="feature-card">
-        <div class="icon-badge" style="background:var(--orange)"><span class="dot"></span></div>
-        <h3>Ursprungsbild aufrufen</h3>
-        <p>Aus dem Internet kopierte Bilder merken sich ihre Quelle.</p>
-      </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<section class="privacy" id="datenschutz">
-  <div class="wrap privacy-grid">
-    <div>
-      <h2>Verschlüsselt, bevor es die Festplatte berührt.</h2>
-      <p class="sub">Die meisten Clipboard-Manager speichern deinen Verlauf offen. Shuno nicht.</p>
-    </div>
-    <div class="privacy-points">
-      <div class="privacy-point">
-        <span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        <div><strong>AES-256-Verschlüsselung</strong><span class="desc">Für jeden einzelnen Eintrag, nicht nur die versteckten.</span></div>
+    <!-- Sicherheit -->
+    <section id="sicherheit" aria-labelledby="s-h">
+      <div class="head">
+        <div class="kicker">Sicherheit</div>
+        <h2 id="s-h">Schutz, den du selbst prüfen kannst.</h2>
+        <p class="sub">Shuno behauptet nicht nur, sicher zu sein: Unter Datenschutz testet die App jede Schutzfunktion live mit echten Testdaten.</p>
       </div>
-      <div class="privacy-point">
-        <span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        <div><strong>Schlüssel im macOS-Schlüsselbund</strong><span class="desc">Getrennt von den eigentlichen Daten gespeichert.</span></div>
+      <div class="sec">
+        <div class="selftest glass" aria-label="Beispiel für den Selbsttest in Shuno">
+          <div class="st-head">
+            <svg viewBox="0 0 30 30" fill="none" aria-hidden="true"><path d="M15 3l10 4v7c0 6.5-4.3 11-10 13-5.7-2-10-6.5-10-13V7z" fill="rgba(48,209,88,.2)" stroke="#30D158" stroke-width="1.8" stroke-linejoin="round"/><path d="M10.5 15l3 3 6-6.5" stroke="#30D158" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div><b>Alle Prüfungen bestanden</b><span>Eben mit Testdaten ausprobiert – alles auf deinem Mac.</span></div>
+          </div>
+          <div class="st-row"><span class="st-ic"><svg viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="#30D158" stroke-width="1.5"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2" stroke="#30D158" stroke-width="1.5"/></svg></span><div>Verschlüsselt gespeichert<small>Testtext ver- und entschlüsselt</small></div><span class="chip">✓ Geprüft</span></div>
+          <div class="st-row"><span class="st-ic"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#30D158" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div>Erkennt gefälschte Links<small>„paypa1.com“ erkannt, „apple.com“ in Ordnung</small></div><span class="chip">✓ Geprüft</span></div>
+          <div class="st-row"><span class="st-ic"><svg viewBox="0 0 16 16" fill="none"><path d="M3 5h8l-2-2M13 11H5l2 2" stroke="#30D158" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div>Erkennt ausgetauschte Kontonummern<small>Test-IBAN und Bitcoin-Adresse erkannt</small></div><span class="chip">✓ Geprüft</span></div>
+          <div class="st-row"><span class="st-ic"><svg viewBox="0 0 16 16" fill="none"><path d="M4 8.5l2.5 2.5L12 5" stroke="#30D158" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div>Nur echte Updates<small>Gefälschtes Test-Update abgelehnt</small></div><span class="chip">✓ Geprüft</span></div>
+        </div>
+        <div class="seclist">
+          <article class="card glass">
+            <h3>Verschlüsselt, bevor es die Festplatte berührt</h3>
+            <p>Dein ganzer Verlauf liegt mit AES-256 verschlüsselt auf dem Mac – auch im optionalen iCloud-Backup. Den Schlüssel verwahrt der macOS-Schlüsselbund.</p>
+          </article>
+          <article class="card glass">
+            <h3>Warnt vor Betrug</h3>
+            <p>Nachgemachte Adressen wie „paypa1.com“, eine täglich aktualisierte Liste bekannter Betrugsseiten und heimlich ausgetauschte IBANs oder Krypto-Adressen – Shuno warnt, bevor du kopierst, öffnest oder überweist.</p>
+          </article>
+          <article class="card glass">
+            <h3>Passwörter bleiben draußen</h3>
+            <p>Kopien aus Passwort-Managern speichert Shuno gar nicht erst. Versteckte Einträge öffnen sich nur mit Touch ID und sperren sich von selbst wieder.</p>
+          </article>
+        </div>
       </div>
-      <div class="privacy-point">
-        <span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        <div><strong>Signierte Updates</strong><span class="desc">Jede neue Version wird vor der Installation geprüft.</span></div>
+    </section>
+
+    <!-- Transparenz -->
+    <section id="transparenz" aria-labelledby="t-h">
+      <div class="head">
+        <div class="kicker">Transparenz</div>
+        <h2 id="t-h">Wann Shuno ins Internet geht.</h2>
+        <p class="sub">Genau so steht es auch in der App unter Datenschutz.</p>
       </div>
-      <div class="privacy-point">
-        <span class="check"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        <div><strong>Ausgeschlossene Apps</strong><span class="desc">Passwort-Manager & Co. lassen sich ausnehmen.</span></div>
+      <div class="net glass">
+        <div class="net-hero"><b>Deine Kopien bleiben bei dir.</b> Was du kopierst, schickt Shuno nie an einen Server – auch nicht an den Entwickler.</div>
+        <div class="net-row"><div><b>Nach Updates schauen</b><p>Liest eine kleine Datei mit der neuesten Versionsnummer.</p></div><span class="state">An</span></div>
+        <div class="net-row"><div><b>Betrugsliste laden</b><p>Einmal am Tag die ganze Liste – geprüft wird nur auf deinem Mac.</p></div><span class="state">An</span></div>
+        <div class="net-row"><div><b>Link-Vorschau</b><p>Ruft die Webseite eines kopierten Links auf, um Titel und Bild zu zeigen.</p></div><span class="state off">Aus</span></div>
+        <div class="net-row"><div><b>Artikel speichern</b><p>Lädt eine Webseite nur, wenn du selbst auf „Lesen“ klickst.</p></div><span class="state">Bei Bedarf</span></div>
+        <div class="net-row"><div><b>Feedback</b><p>Nur wenn du selbst auf „Senden“ klickst.</p></div><span class="state">Bei Bedarf</span></div>
       </div>
+    </section>
+
+    <!-- Installation -->
+    <section id="installation" aria-labelledby="i-h">
+      <div class="head">
+        <div class="kicker">Installation</div>
+        <h2 id="i-h">In einer Minute startklar.</h2>
+      </div>
+      <div class="steps">
+        <div class="step glass"><h3>Laden</h3><p>Die neueste Version unter <a href="https://github.com/ozevstudio/shuno/releases/latest">Versionen</a> herunterladen und die DMG-Datei öffnen.</p></div>
+        <div class="step glass"><h3>In Programme ziehen</h3><p>Shuno in den Ordner „Programme“ ziehen – nicht im Download-Ordner starten.</p></div>
+        <div class="step glass"><h3>Erstes Öffnen</h3><p>Meldet macOS, Shuno könne nicht überprüft werden: <b>Rechtsklick → Öffnen</b>. Oder unter Systemeinstellungen → Datenschutz &amp; Sicherheit → „Trotzdem öffnen“.</p></div>
+      </div>
+    </section>
+
+    <!-- Abschluss -->
+    <div class="final glass">
+      <h2>Bereit für eine sichere Zwischenablage?</h2>
+      <p class="sub">Kostenlos, ohne Konto, ohne Werbung.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="https://github.com/ozevstudio/shuno/releases/latest">Für macOS laden</a>
+      </div>
+      <p class="meta">macOS 26 oder neuer · Mac mit Apple Silicon</p>
     </div>
   </div>
-</section>
+</main>
 
 <footer>
   <div class="wrap">
-    <span>Shuno — von <a href="https://github.com/ozevstudio">ozevstudio</a></span>
-    <div class="footer-links">
-      <a href="https://github.com/ozevstudio/shuno/releases">Versionshistorie</a>
-      <a href="https://github.com/ozevstudio/shuno#readme">README</a>
-      <a href="https://github.com/ozevstudio/shuno">Quellcode</a>
+    <div class="cols">
+      <div>
+        <p><b style="color:var(--text-2)">Shuno</b> – von <a href="https://github.com/ozevstudio" style="display:inline">ozevstudio</a></p>
+        <p>Entwickelt mit Unterstützung der KI Claude von Anthropic. Shuno sendet nichts an Claude oder andere KI-Dienste.</p>
+        <p>Betrugsliste: Phishing.Database (MIT) · Wortliste für Feedback: LDNOOBW (CC BY 4.0)</p>
+      </div>
+      <div>
+        <h4>Shuno</h4>
+        <a href="https://github.com/ozevstudio/shuno/releases">Versionshistorie</a>
+        <a href="https://github.com/ozevstudio/shuno#readme">README</a>
+        <a href="https://github.com/ozevstudio/shuno/blob/main/LICENSE">Nutzungsbedingungen</a>
+      </div>
+      <div>
+        <h4>Hilfe</h4>
+        <a href="https://github.com/ozevstudio/shuno/issues/new/choose">Fehler melden oder Idee vorschlagen</a>
+        <a href="https://github.com/ozevstudio/shuno/blob/main/SECURITY.md">Sicherheitslücke melden</a>
+        <a href="https://github.com/ozevstudio/shuno/blob/main/ACCESSIBILITY.md">Barrierefreiheit</a>
+      </div>
     </div>
   </div>
 </footer>
-
 </body>
 </html>
